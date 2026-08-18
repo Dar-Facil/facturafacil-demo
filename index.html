@@ -1,0 +1,769 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
+<meta name="theme-color" content="#1E4A40">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>facturafácil</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Hanken+Grotesk:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bone:#FBF8F2; --cream:#F3ECE0; --ink:#211B16; --ink2:#5C534A;
+    --pine:#1E4A40; --pine2:#2E6B5A; --amber:#C07F1E; --border:#E6DCCC;
+    --green:#1F9A63; --okbg:#E3F2EA; --warnbg:#F6E8CF;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  body{font-family:'Hanken Grotesk',system-ui,sans-serif;background:var(--cream);color:var(--ink);line-height:1.45;font-size:15px}
+
+  /* ===== layout: panel izquierdo + iPhone ===== */
+  .app{display:grid;grid-template-columns:300px 1fr;min-height:100dvh}
+  @media(max-width:920px){.app{grid-template-columns:1fr}}
+  .side{background:var(--bone);border-right:1px solid var(--border);padding:26px 20px;position:sticky;top:0;height:100dvh;overflow:auto}
+  @media(max-width:920px){.side{position:static;height:auto;border-right:none;border-bottom:1px solid var(--border)}}
+  .logo{display:flex;align-items:center;gap:9px;font-weight:800;color:var(--pine);font-size:17px}
+  .logo svg{width:30px;height:30px;flex:none}
+  .side .subt{font-size:12.5px;color:var(--ink2);margin-top:5px}
+  .side .k{font-size:11px;letter-spacing:.13em;text-transform:uppercase;color:var(--amber);font-weight:800;margin:22px 0 10px}
+  .fcard{width:100%;text-align:left;background:#fff;border:1.5px solid var(--border);border-radius:15px;padding:14px 15px;cursor:pointer;font-family:inherit;margin-bottom:10px;transition:border-color .15s, box-shadow .15s;display:block}
+  .fcard:hover{border-color:var(--pine2)}
+  .fcard.on{border-color:var(--amber);box-shadow:0 0 0 3px rgba(192,127,30,.15)}
+  .fcard b{display:block;font-size:14.5px;color:var(--ink)}
+  .fcard span{font-size:12px;color:var(--ink2);display:block;margin-top:3px;line-height:1.4}
+  .reset{width:100%;border:1px solid var(--border);background:#fff;color:var(--ink2);border-radius:12px;padding:11px;font-family:inherit;font-size:13px;font-weight:700;cursor:pointer;margin-top:4px}
+  .reset:hover{color:var(--pine);border-color:var(--pine2)}
+  .sidenote{font-size:11.5px;color:var(--ink2);background:var(--cream);border:1px solid var(--border);border-radius:12px;padding:11px 12px;margin-top:16px;line-height:1.5}
+  .sidenote b{color:var(--ink)}
+  .stage{display:flex;align-items:flex-start;justify-content:center;padding:36px 18px 70px;background:var(--cream)}
+
+  /* ===== frame de iPhone ===== */
+  .iphone{width:408px;max-width:100%;background:#100e0c;border-radius:58px;padding:13px;box-shadow:0 34px 80px rgba(33,27,22,.35), inset 0 0 0 2px #3a332e, inset 0 0 0 6px #100e0c;position:relative}
+  .iphone::before{content:"";position:absolute;left:-3px;top:190px;width:3px;height:64px;background:#2a2522;border-radius:3px 0 0 3px}
+  .iphone::after{content:"";position:absolute;right:-3px;top:230px;width:3px;height:96px;background:#2a2522;border-radius:0 3px 3px 0}
+  .iscreen{background:var(--bone);border-radius:46px;overflow:hidden;min-height:760px;display:flex;flex-direction:column;position:relative}
+  .island{position:absolute;top:11px;left:50%;transform:translateX(-50%);width:118px;height:32px;background:#100e0c;border-radius:999px;z-index:80}
+  .statusbar{display:flex;justify-content:space-between;align-items:center;padding:16px 30px 6px;font-size:14px;font-weight:700;color:var(--ink)}
+  .statusbar .icons{display:flex;gap:6px;align-items:center;font-size:12px}
+  .statusbar .batt{width:24px;height:11px;border:1.5px solid var(--ink2);border-radius:3.5px;position:relative}
+  .statusbar .batt::before{content:"";position:absolute;left:1.5px;top:1.5px;bottom:1.5px;width:70%;background:var(--pine);border-radius:1.5px}
+  .statusbar .batt::after{content:"";position:absolute;right:-4px;top:2.6px;width:2px;height:4.5px;background:var(--ink2);border-radius:0 2px 2px 0}
+  .screen{flex:1;display:flex;flex-direction:column;position:relative}
+  .homebar{height:22px;display:flex;align-items:center;justify-content:center}
+  .homebar i{width:130px;height:5px;border-radius:99px;background:var(--ink);opacity:.85}
+  .appbar{background:var(--pine);color:#fff;padding:13px 16px;font-weight:800;display:flex;align-items:center;gap:8px;font-size:14px}
+  .appbar .mini{width:21px;height:21px;border-radius:6px;background:#fff;color:var(--pine);display:flex;align-items:center;justify-content:center;font-family:'Fraunces',serif;font-size:12px}
+  .appbar .amt{margin-left:auto;font-weight:800;font-size:13px;background:rgba(255,255,255,.14);border-radius:999px;padding:3px 11px}
+  .scr{display:none;flex-direction:column;gap:11px;padding:16px 16px 24px;flex:1;animation:fade .25s ease}
+  .scr.on{display:flex}
+  @keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+
+  h1{font-family:'Fraunces',serif;font-weight:500;font-size:23px;line-height:1.15}
+  h1 em{font-style:italic;color:var(--pine2)}
+  .sub{color:var(--ink2);font-size:13.5px}
+  .center{text-align:center}
+  .note{font-size:12px;color:var(--ink2)}
+  .back{align-self:flex-start;background:none;border:none;color:var(--ink2);font-family:inherit;font-size:13px;font-weight:700;cursor:pointer;padding:0}
+  .back::before{content:"← "}
+  .dots{display:flex;gap:6px;justify-content:center;margin:0 0 2px}
+  .dots i{width:7px;height:7px;border-radius:999px;background:var(--border)}
+  .dots i.on{background:var(--amber);width:20px}
+
+  .paybtn{display:flex;align-items:center;justify-content:center;gap:9px;width:100%;border:none;border-radius:13px;padding:14px;font-family:inherit;font-size:15px;font-weight:800;cursor:pointer;transition:transform .1s, filter .15s}
+  .paybtn:active{transform:scale(.985)}
+  .paybtn:hover{filter:brightness(1.05)}
+  .paybtn.ff{background:var(--green);color:#fff}
+  .paybtn.ap{background:#111;color:#fff}
+  .paybtn.gg{background:#fff;color:var(--ink);border:1.5px solid var(--border)}
+  .paybtn svg{width:18px;height:18px;flex:none}
+  .paybtn .lgo{background:#fff;color:var(--green);border-radius:99px;width:18px;height:18px;display:inline-flex;align-items:center;justify-content:center;font-size:11px;font-weight:900}
+  .divider{display:flex;align-items:center;gap:10px;color:var(--ink2);font-size:11.5px;font-weight:700}
+  .divider::before,.divider::after{content:"";flex:1;border-top:1px solid var(--border)}
+  .field{display:flex;flex-direction:column;gap:4px}
+  .field label{font-size:11px;font-weight:800;color:var(--ink2);letter-spacing:.03em;text-transform:uppercase}
+  .field input,.field select{border:1.5px solid var(--border);background:#fff;border-radius:11px;padding:11px 12px;font-family:inherit;font-size:14.5px;color:var(--ink);width:100%}
+  .field input:focus,.field select:focus{outline:2px solid var(--pine2);border-color:var(--pine2)}
+  .filled{background:var(--okbg) !important;border-color:#bcd9c9 !important}
+  .row2{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+  .scanlink{font-size:12px;font-weight:800;color:var(--pine2);background:none;border:none;cursor:pointer;font-family:inherit;text-decoration:underline;padding:0;align-self:flex-end}
+
+  .savecard{background:#fff;border:1.5px solid var(--border);border-radius:14px;padding:13px}
+  .savecard .top{display:flex;gap:9px;align-items:flex-start}
+  .chkbox{width:20px;height:20px;border-radius:6px;background:var(--pine);color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:900;flex:none;cursor:pointer;border:none}
+  .chkbox.off{background:#fff;border:1.5px solid var(--border);color:transparent}
+  .savecard b{font-size:13px;display:block;line-height:1.3}
+  .savecard .s{font-size:11.5px;color:var(--ink2);margin-top:2px;display:block}
+  .savecard .inner{border:1px solid var(--border);border-radius:11px;margin-top:10px;overflow:hidden}
+  .savecard .inner .r{display:flex;align-items:center;gap:8px;padding:9px 11px;border-bottom:1px solid var(--border);font-size:13px}
+  .savecard .inner .r:last-child{border-bottom:none}
+  .savecard .inner input{border:none;outline:none;font-family:inherit;font-size:13.5px;flex:1;background:transparent;color:var(--ink)}
+  .savecard .inner .lk{margin-left:auto;font-size:10px;font-weight:900;color:var(--green)}
+  .paymain{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;background:var(--pine);color:#fff;border:none;border-radius:13px;padding:15px;font-family:inherit;font-size:15.5px;font-weight:800;cursor:pointer}
+  .paymain:hover{background:var(--pine2)}
+  .ticketchip{display:flex;align-items:center;gap:9px;background:#fff;border:1px solid var(--border);border-radius:12px;padding:10px 12px;font-size:12.5px;color:var(--ink2)}
+  .ticketchip .ic{width:32px;height:32px;border-radius:9px;background:var(--cream);display:flex;align-items:center;justify-content:center;font-size:15px;flex:none}
+  .ticketchip b{color:var(--ink)}
+  .ticketchip .amt{margin-left:auto;font-weight:800;color:var(--ink);font-size:14px}
+
+  .prof{background:linear-gradient(135deg,var(--pine),var(--pine2));color:#fff;border-radius:15px;padding:15px;font-size:12.5px;position:relative;overflow:hidden}
+  .prof::after{content:"";position:absolute;right:-30px;top:-30px;width:100px;height:100px;border-radius:999px;background:rgba(255,255,255,.07)}
+  .prof .tag{font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.75);font-weight:800}
+  .prof .rfc{font-size:17px;font-weight:800;letter-spacing:.05em;margin:4px 0 1px;font-family:'Fraunces',serif}
+  .prof .row{display:flex;justify-content:space-between;color:rgba(255,255,255,.85);margin-top:4px}
+  .prof .row span:last-child{color:#fff;font-weight:700}
+  .mailrow{display:flex;gap:8px;align-items:center}
+  .mailrow input{flex:1;border:1.5px solid var(--border);background:#fff;border-radius:11px;padding:10px 12px;font-family:inherit;font-size:13.5px;color:var(--ink)}
+  .rm{width:36px;height:36px;flex:none;border-radius:999px;border:1px solid var(--border);background:#fff;color:var(--ink2);font-size:15px;font-weight:700;cursor:pointer;line-height:1}
+  .rm:hover{color:#B3462E;border-color:#B3462E}
+  .addmail{background:none;border:none;color:var(--pine2);font-family:inherit;font-size:12.5px;font-weight:800;cursor:pointer;text-decoration:underline;padding:2px 0;align-self:flex-start}
+
+  .opt{display:flex;gap:12px;align-items:flex-start;background:#fff;border:1.5px solid var(--border);border-radius:15px;padding:14px;cursor:pointer;text-align:left;width:100%;font-family:inherit;transition:border-color .15s}
+  .opt:hover{border-color:var(--pine2)}
+  .opt .ic{width:38px;height:38px;border-radius:11px;background:var(--cream);display:flex;align-items:center;justify-content:center;font-size:18px;flex:none}
+  .opt b{display:block;font-size:14px;color:var(--ink)}
+  .opt span{font-size:12px;color:var(--ink2);display:block;margin-top:2px}
+  .opt .badge{font-size:9.5px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:var(--amber);background:var(--warnbg);border-radius:999px;padding:2px 8px;margin-left:5px}
+  .opt.rec{background:var(--green);border-color:var(--green)}
+  .opt.rec b{color:#fff}
+  .opt.rec span{color:rgba(255,255,255,.85)}
+  .opt.rec .ic{background:rgba(255,255,255,.18)}
+  .opt.rec .badge{background:#fff;color:var(--green)}
+  .opt.rec:hover{border-color:var(--pine)}
+  .qractions{display:flex;gap:8px}
+  .qractions button{flex:1;background:#fff;border:1.5px solid var(--border);border-radius:11px;padding:9px 6px;font-family:inherit;font-size:11.5px;font-weight:800;color:var(--pine);cursor:pointer}
+  .qractions button:hover{border-color:var(--pine2)}
+  .up{display:flex;align-items:center;gap:10px;background:#fff;border:1.5px dashed var(--border);border-radius:12px;padding:11px 13px;cursor:pointer;font-size:13px;color:var(--ink2);width:100%;font-family:inherit;text-align:left}
+  .up .ic{width:32px;height:32px;border-radius:9px;background:var(--cream);display:flex;align-items:center;justify-content:center;font-size:15px;flex:none}
+  .up.done{border-style:solid;border-color:#bcd9c9;background:var(--okbg)}
+  .up.done .st{color:var(--pine);font-weight:800}
+  .up .st{margin-left:auto;font-weight:700;font-size:11.5px;color:var(--amber)}
+  .ghost{display:flex;align-items:center;justify-content:center;width:100%;background:#fff;color:var(--pine);border:1.5px solid var(--border);border-radius:13px;padding:12px;font-family:inherit;font-size:14px;font-weight:800;cursor:pointer}
+  .ghost:hover{border-color:var(--pine2)}
+  .linklike{background:none;border:none;color:var(--pine2);font-family:inherit;font-size:13px;font-weight:800;cursor:pointer;text-decoration:underline;padding:4px}
+  .chk{display:flex;align-items:flex-start;gap:8px;background:#fff;border:1px solid var(--border);border-radius:12px;padding:10px 12px;font-size:12.5px;color:var(--ink2)}
+  .chk i{width:18px;height:18px;border-radius:999px;background:var(--okbg);color:var(--pine);font-style:normal;font-weight:800;font-size:10px;display:flex;align-items:center;justify-content:center;flex:none;margin-top:1px}
+  .chk b{color:var(--ink)}
+
+  .cam{background:#161210;border-radius:15px;padding:20px 14px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;min-height:210px}
+  .cam .fr{width:145px;height:145px;border-radius:13px;position:relative;background:
+      repeating-linear-gradient(0deg,rgba(255,255,255,.85) 0 5px,transparent 5px 10px),
+      repeating-linear-gradient(90deg,rgba(255,255,255,.85) 0 5px,rgba(40,34,30,.9) 5px 10px)}
+  .cam .fr::after{content:"";position:absolute;left:5px;right:5px;top:7px;height:3px;background:var(--amber);border-radius:99px;box-shadow:0 0 12px var(--amber);animation:laser 1.4s ease-in-out infinite}
+  @keyframes laser{0%,100%{top:7px}50%{top:calc(100% - 10px)}}
+  .cam p{color:rgba(255,255,255,.8);font-size:12.5px;text-align:center}
+  .spin{width:48px;height:48px;border-radius:999px;border:5px solid var(--cream);border-top-color:var(--amber);margin:30px auto 8px;animation:rot 1s linear infinite}
+  @keyframes rot{to{transform:rotate(360deg)}}
+  .bigok{width:60px;height:60px;border-radius:999px;background:var(--pine);color:#fff;font-size:27px;display:flex;align-items:center;justify-content:center;margin:12px auto 2px;animation:pop .35s ease}
+  @keyframes pop{from{transform:scale(.5);opacity:0}to{transform:scale(1);opacity:1}}
+  .uuid{font-size:10px;color:var(--ink2);word-break:break-all;background:var(--cream);border-radius:9px;padding:7px 10px}
+  .qr{width:120px;height:120px;margin:4px auto;background:
+      repeating-linear-gradient(0deg,var(--ink) 0 6px,transparent 6px 12px),
+      repeating-linear-gradient(90deg,var(--ink) 0 6px,#fff 6px 12px);
+      border:8px solid #fff;outline:1px solid var(--border);border-radius:8px;position:relative}
+  .qr::after{content:"F";position:absolute;inset:0;margin:auto;width:32px;height:32px;background:var(--pine);color:#fff;border-radius:8px;display:flex;align-items:center;justify-content:center;font-family:'Fraunces',serif;font-size:17px;border:3px solid #fff}
+  .card{background:#fff;border:1px solid var(--border);border-radius:15px;padding:14px}
+  .card.cream{background:var(--cream);border-color:var(--border)}
+  .card .note{margin:0}
+  .kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+  .kpi{background:#fff;border:1px solid var(--border);border-radius:12px;padding:10px 11px}
+  .kpi .n{font-family:'Fraunces',serif;font-size:20px;font-weight:600;color:var(--pine)}
+  .kpi .l{font-size:10px;color:var(--ink2);line-height:1.25;margin-top:1px}
+  .list{background:#fff;border:1px solid var(--border);border-radius:14px;overflow:hidden}
+  .li{display:flex;align-items:center;gap:10px;padding:11px 13px;border-bottom:1px solid var(--border);font-size:13px;color:var(--ink2)}
+  .li:last-child{border-bottom:none}
+  .li .ic{width:32px;height:32px;border-radius:999px;background:var(--cream);display:flex;align-items:center;justify-content:center;font-size:14px;flex:none}
+  .li b{color:var(--ink);display:block;font-size:13px}
+  .li .amt{margin-left:auto;text-align:right;font-weight:700;color:var(--ink);flex:none;font-size:12.5px}
+  .li .amt small{display:block;font-weight:600;color:var(--ink2);font-size:10.5px}
+  .alert{display:flex;gap:9px;background:var(--warnbg);border:1px solid #ecd9b4;border-radius:12px;padding:11px 12px;font-size:12px;color:#6b4a10}
+  .alert b{color:#4d350a}
+  /* botón de escaneo prominente (CSF) */
+  .scanbtn{display:flex;gap:13px;align-items:center;width:100%;background:#fff;border:2px solid var(--pine);border-radius:15px;padding:14px 15px;cursor:pointer;font-family:inherit;text-align:left;transition:box-shadow .15s, transform .1s}
+  .scanbtn:hover{box-shadow:0 0 0 3px rgba(30,74,64,.12)}
+  .scanbtn:active{transform:scale(.985)}
+  .scanbtn .camic{width:46px;height:46px;border-radius:13px;background:var(--okbg);color:var(--pine);display:flex;align-items:center;justify-content:center;font-size:22px;flex:none}
+  .scanbtn.sec{border-color:var(--border)}
+  .scanbtn.sec .camic{background:var(--cream)}
+  .stats3{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+  .stat3{background:#fff;border:1px solid var(--border);border-radius:12px;padding:10px 11px;text-align:center}
+  .stat3 .n{font-family:'Fraunces',serif;font-size:20px;font-weight:600;color:var(--pine)}
+  .stat3 .l{font-size:10px;color:var(--ink2);line-height:1.25;margin-top:1px}
+  .nfctag{width:120px;height:120px;border-radius:999px;margin:6px auto;background:radial-gradient(circle at center, var(--pine) 0 34%, #fff 34% 42%, var(--pine2) 42% 58%, #fff 58% 66%, var(--pine) 66% 100%);display:flex;align-items:center;justify-content:center;box-shadow:0 12px 26px rgba(30,74,64,.25)}
+  .nfctag i{background:#fff;border-radius:999px;width:44px;height:44px;display:flex;align-items:center;justify-content:center;font-style:normal;font-size:20px}
+  .empty{background:var(--cream);border:1px dashed var(--border);border-radius:14px;padding:18px 16px;text-align:center;font-size:13px;color:var(--ink2)}
+  .empty b{color:var(--ink);display:block;margin-bottom:3px}
+  .scanbtn b{display:block;font-size:15px;color:var(--ink)}
+  .scanbtn span{font-size:12px;color:var(--ink2);display:block;margin-top:2px;line-height:1.35}
+  /* dropdown de captura manual — siempre visible */
+  .manualdd{width:100%}
+  .manualdd summary{display:flex;gap:13px;align-items:center;background:#fff;border:1.5px solid var(--border);border-radius:15px;padding:14px 15px;cursor:pointer;list-style:none;transition:border-color .15s}
+  .manualdd summary::-webkit-details-marker{display:none}
+  .manualdd summary:hover{border-color:var(--pine2)}
+  .manualdd summary .camic{width:46px;height:46px;border-radius:13px;background:var(--cream);display:flex;align-items:center;justify-content:center;font-size:22px;flex:none}
+  .manualdd summary b{display:block;font-size:15px;color:var(--ink)}
+  .manualdd summary span{font-size:12px;color:var(--ink2);display:block;margin-top:2px;line-height:1.35}
+  .manualdd summary .ddchev{margin-left:auto;color:var(--ink2);font-size:15px;transition:transform .2s;flex:none}
+  .manualdd[open] summary{border-color:var(--pine2);border-radius:15px 15px 0 0;border-bottom-style:dashed}
+  .manualdd[open] summary .ddchev{transform:rotate(180deg)}
+  .manualdd .ddbody{display:flex;flex-direction:column;gap:11px;background:#fff;border:1.5px solid var(--pine2);border-top:none;border-radius:0 0 15px 15px;padding:14px 15px}
+  /* selector de uso CFDI (sheet) */
+  .rowsel{display:flex;align-items:center;gap:8px;width:100%;background:#fff;border:1.5px solid var(--border);border-radius:13px;padding:12px 14px;font-family:inherit;font-size:13px;color:var(--ink2);cursor:pointer;text-align:left}
+  .rowsel:hover{border-color:var(--pine2)}
+  .rowsel b{color:var(--ink);font-size:13.5px}
+  .rowsel .chev{margin-left:auto;color:var(--ink2);font-size:14px}
+  .backdrop{position:absolute;inset:0;background:rgba(33,27,22,.35);opacity:0;pointer-events:none;transition:opacity .2s;z-index:94;border-radius:inherit}
+  .backdrop.open{opacity:1;pointer-events:auto}
+  .sheet{position:absolute;left:0;right:0;bottom:0;background:#fff;border-radius:26px 26px 0 0;box-shadow:0 -12px 40px rgba(33,27,22,.22);padding:14px 16px 26px;z-index:95;transform:translateY(105%);visibility:hidden;transition:transform .25s ease, visibility .25s}
+  .sheet.open{transform:none;visibility:visible}
+  .sheet .grab{width:44px;height:5px;border-radius:99px;background:var(--border);margin:0 auto 12px}
+  .sheet h5{font-family:'Fraunces',serif;font-weight:600;font-size:16px;margin-bottom:10px}
+  .sheet .op{display:flex;align-items:center;gap:10px;width:100%;background:var(--bone);border:1.5px solid var(--border);border-radius:12px;padding:12px 13px;font-family:inherit;font-size:13.5px;color:var(--ink);font-weight:700;cursor:pointer;margin-bottom:8px;text-align:left}
+  .sheet .op small{display:block;font-weight:600;color:var(--ink2);font-size:11.5px}
+  .sheet .op.sel{border-color:var(--pine);background:var(--okbg)}
+  .sheet .op .mark{margin-left:auto;color:var(--pine);font-weight:900}
+
+  /* estados de sesión */
+  .sessionbar{display:flex;justify-content:space-between;align-items:center;gap:8px;background:var(--cream);border:1px solid var(--border);border-radius:12px;padding:8px 12px;font-size:12px;color:var(--ink2)}
+  .sessionbar b{color:var(--ink)}
+  .link2{background:none;border:none;color:var(--pine2);font-family:inherit;font-size:12px;font-weight:800;cursor:pointer;text-decoration:underline;padding:0;white-space:nowrap}
+  .idchip{display:flex;align-items:center;gap:10px;background:#fff;border:1.5px solid #bcd9c9;border-radius:14px;padding:10px 13px}
+  .idchip .av{width:34px;height:34px;border-radius:999px;background:var(--pine);color:#fff;font-weight:800;font-size:12.5px;display:flex;align-items:center;justify-content:center;flex:none}
+  .idchip .who b{display:block;font-size:13.5px;color:var(--ink)}
+  .idchip .who span{font-size:11.5px;color:var(--ink2)}
+  .idchip .st{margin-left:auto;text-align:right}
+  .idchip .st i{display:block;font-style:normal;font-size:10px;font-weight:800;color:var(--green)}
+  .idchip .link2{background:none;border:none;color:var(--ink2);font-family:inherit;font-size:11px;font-weight:700;cursor:pointer;text-decoration:underline;padding:0}
+  .segmini{display:flex;gap:5px;background:var(--cream);border:1px solid var(--border);border-radius:10px;padding:3px;margin:-4px 0 10px}
+  .segmini button{flex:1;border:none;background:transparent;border-radius:7px;padding:7px 4px;font-family:inherit;font-size:11.5px;font-weight:800;color:var(--ink2);cursor:pointer}
+  .segmini button.on{background:var(--pine);color:#fff}
+  .codes{display:flex;gap:7px;justify-content:center;margin:4px 0}
+  .codes b{width:40px;height:50px;border:1.5px solid var(--border);border-radius:12px;background:#fff;display:flex;align-items:center;justify-content:center;font-size:20px;font-family:'Fraunces',serif;font-weight:600;color:var(--pine);transition:all .15s}
+  .codes b.f{border-color:var(--pine2);background:var(--okbg);animation:pop .25s ease}
+  .sms{display:flex;gap:10px;align-items:flex-start;background:var(--ink);color:#fff;border-radius:14px;padding:11px 13px;font-size:12px;opacity:0;transform:translateY(-8px);animation:smsin .5s ease .7s forwards;box-shadow:0 10px 24px rgba(33,27,22,.25)}
+  .sms .ic{width:30px;height:30px;border-radius:9px;background:var(--pine2);display:flex;align-items:center;justify-content:center;font-size:14px;flex:none}
+  .sms b{display:block;font-size:12px}
+  .sms span{color:rgba(255,255,255,.75)}
+  @keyframes smsin{to{transform:none;opacity:1}}
+
+  .confetti{position:absolute;inset:0;pointer-events:none;overflow:hidden;z-index:90}
+  .confetti i{position:absolute;top:-14px;width:7px;height:12px;border-radius:2px;animation:fall linear forwards}
+  @keyframes fall{to{transform:translateY(700px) rotate(560deg)}}
+
+  /* ===== overrides: app móvil standalone ===== */
+  html,body{background:var(--bone)}
+  .mshell{max-width:520px;margin:0 auto;min-height:100dvh;background:var(--bone);position:relative;display:flex;flex-direction:column;box-shadow:0 0 40px rgba(33,27,22,.06)}
+  .appbar{position:sticky;top:0;z-index:60;padding-top:calc(13px + env(safe-area-inset-top))}
+  .screen{flex:1;display:flex;flex-direction:column}
+  .scr{padding-bottom:90px}
+  .backdrop{position:fixed;inset:0;border-radius:0}
+  .sheet{position:fixed;left:50%;bottom:0;width:100%;max-width:520px;transform:translateX(-50%) translateY(105%);padding-bottom:calc(26px + env(safe-area-inset-bottom))}
+  .sheet.open{transform:translateX(-50%) translateY(0)}
+  .demofab{position:fixed;right:16px;bottom:calc(16px + env(safe-area-inset-bottom));z-index:93;width:50px;height:50px;border-radius:999px;border:none;background:var(--ink);color:#fff;font-size:19px;cursor:pointer;box-shadow:0 10px 26px rgba(33,27,22,.35);display:flex;align-items:center;justify-content:center}
+  .sheet .op.on{border-color:var(--pine);background:var(--okbg)}
+  .menuseg{display:flex;gap:6px;background:var(--cream);border:1px solid var(--border);border-radius:11px;padding:4px;margin:2px 0 10px}
+  .menuseg button{flex:1;border:none;background:transparent;border-radius:8px;padding:9px 4px;font-family:inherit;font-size:12.5px;font-weight:800;color:var(--ink2);cursor:pointer}
+  .menuseg button.on{background:var(--pine);color:#fff}
+  .menureset{width:100%;border:1px solid var(--border);background:#fff;color:var(--ink2);border-radius:11px;padding:11px;font-family:inherit;font-size:13px;font-weight:700;cursor:pointer}
+</style>
+</head>
+<body>
+<div id="ql-warn" style="background:#C07F1E;color:#fff;padding:14px 16px;font-size:14px;font-weight:700;text-align:center;line-height:1.4">⚠️ Estás viendo una vista previa sin interacción.<br>Toca <u>Compartir → Abrir en Safari</u> (o "Abrir en el navegador") para usar el demo.</div>
+<div class="mshell">
+  <div class="screen" id="screen">
+      <div class="appbar" id="topbar"><svg viewBox="0 0 32 32" style="width:21px;height:21px;flex:none"><rect width="32" height="32" rx="9" fill="#fff"/><path d="M18.4 5 9.2 18.2h5.6l-1.5 8.8 9.5-12h-5.7z" fill="#1E4A40"/></svg> <span id="topname">Ferretería El Norte</span> <span class="amt" id="topamt">$486.50</span></div>
+
+      <!-- ================= CLIENTE · SIN CUENTA ================= -->
+      <div class="scr on" id="c-main">
+        <div class="row2">
+          <div class="field"><label>Folio de tu ticket</label><input value="A-4412" placeholder="viene impreso en tu ticket"></div>
+          <div class="field"><label>Monto total</label><input value="$486.50" placeholder="$0.00"></div>
+        </div>
+        <p class="note" style="margin-top:-4px">🔒 Los dos vienen en tu ticket. Cada folio solo se puede facturar una vez.</p>
+
+        <button class="paybtn ff" onclick="show('c-login')"><span style="font-weight:600;opacity:.95">Inicia sesión con</span><svg viewBox="0 0 32 32" style="width:21px;height:21px"><circle cx="16" cy="16" r="16" fill="#fff"/><path d="M18 6.5 10.6 17.4h4.9l-1.3 8.1 7.6-11.3h-5z" fill="#1F9A63"/></svg><span style="font-weight:900;letter-spacing:-.02em;font-size:16px">facturafácil</span></button>
+        <p class="note center" style="margin-top:-3px">Con tu cuenta facturas en <b style="color:var(--ink)">1 tap</b>, sin meter ningún dato.</p>
+
+        <div class="divider">o factura en 30 segundos</div>
+
+        <button class="scanbtn" onclick="show('c-cam');setTimeout(()=>show('c-scanned'),1900)">
+          <div class="camic">📷</div>
+          <div><b>Escanear mi Constancia (CSF)</b><span>Se llena todo solo — y tu cuenta se crea automáticamente con tus datos verificados.</span></div>
+        </button>
+        <details class="manualdd">
+          <summary>
+            <div class="camic">⌨️</div>
+            <div><b>Capturar mis datos a mano</b><span>RFC, nombre, régimen, CP y uso de CFDI — con validación en vivo.</span></div>
+            <span class="ddchev">▾</span>
+          </summary>
+          <div class="ddbody">
+          <div class="field"><label>RFC</label><input placeholder="XAXX010101000" value="PAWI7608159K3"></div>
+          <div class="field"><label>Nombre (como en tu Constancia)</label><input value="PATRICIO WILLIAMS"></div>
+          <div class="row2">
+            <div class="field"><label>Régimen</label><select><option>626 · RESICO</option><option>612 · Act. empresarial</option><option>601 · General PM</option></select></div>
+            <div class="field"><label>CP fiscal</label><input value="64610"></div>
+          </div>
+          <div class="field"><label>Uso de CFDI</label><select><option>G03 · Gastos en general</option><option>G01 · Adquisición de mercancías</option><option>D01 · Honorarios médicos</option><option>S01 · Sin efectos fiscales</option></select></div>
+          <div class="field"><label>Correo para tu factura</label><input type="email" value="patricio@ejemplo.com"></div>
+          <div id="c-mails"></div>
+          <button class="addmail" onclick="addMail('c-mails')">＋ Enviar también a otro correo (contadora, operación…)</button>
+          <div class="savecard">
+            <div class="top">
+              <button class="chkbox" id="savechk" onclick="toggleSave()">✓</button>
+              <div><b>Guardar mis datos para facturar en 1 clic</b><span class="s">Tu cuenta se crea con estos datos. Gratis, siempre.</span></div>
+            </div>
+            <div class="inner" id="saveinner">
+              <div class="r">📱 <input type="tel" value="81 1234 5678"><span class="lk">⚡ wallet</span></div>
+            </div>
+            <p class="note" style="margin-top:8px">📱 <b style="color:var(--ink)">Tu celular es tu llave:</b> un código de verificación una sola vez, y te reconocemos en cualquier teléfono. Sin contraseñas.</p>
+          </div>
+          <button class="paymain" onclick="proc('c-done','Validando folio A-4412 con el negocio… ✓<br>Timbrando con el SAT vía PAC',1700,true)">🔒 &nbsp;Facturar $486.50</button>
+          </div>
+        </details>
+        <p class="note center">Timbrado por PAC autorizado del SAT · XML + PDF a tu correo</p>
+      </div>
+
+      <!-- cámara CSF -->
+      <div class="scr" id="c-cam">
+        <div class="cam" style="flex:1"><div class="fr"></div><p>Apunta al QR de tu Constancia…<br><small>leyendo tus datos verificados del SAT</small></p></div>
+      </div>
+
+      <!-- datos escaneados → cuenta automática -->
+      <div class="scr" id="c-scanned">
+        <button class="back" onclick="show('c-main')">Volver</button>
+        <div class="chk"><i>✓</i><div><b>Datos leídos del SAT</b> — verificados, sin teclear nada:</div></div>
+        <div class="row2">
+          <div class="field"><label>RFC</label><input class="filled" value="PAWI7608159K3" readonly></div>
+          <div class="field"><label>Régimen · CP</label><input class="filled" value="626 · 64610" readonly></div>
+        </div>
+        <div class="field"><label>Nombre</label><input class="filled" value="PATRICIO WILLIAMS" readonly></div>
+        <div class="field"><label>Uso de CFDI</label><select><option>G03 · Gastos en general</option><option>G01 · Adquisición de mercancías</option><option>D01 · Honorarios médicos</option><option>S01 · Sin efectos fiscales</option></select></div>
+        <div class="savecard" style="border-color:#bcd9c9">
+          <div class="top">
+            <div class="chkbox">⚡</div>
+            <div><b>Tu cuenta facturafácil se crea automáticamente</b><span class="s">Con estos datos verificados. Solo confirma a dónde te enviamos las facturas:</span></div>
+          </div>
+          <div class="inner">
+            <div class="r">✉️ <input type="email" value="patricio@ejemplo.com"><span class="lk">⚡ wallet</span></div>
+            <div class="r">📱 <input type="tel" value="81 1234 5678"></div>
+          </div>
+          <p class="note" style="margin-top:8px">📱 <b style="color:var(--ink)">Tu celular es tu llave:</b> lo verificamos una vez con un código y con él te reconocemos en cualquier teléfono. Este dispositivo queda recordado — sin contraseñas, nunca.</p>
+        </div>
+        <div id="s-mails"></div>
+        <button class="addmail" onclick="addMail('s-mails')">＋ Enviar también a otro correo (contadora, operación…)</button>
+        <button class="paymain" onclick="proc('c-done','Validando folio A-4412 con el negocio… ✓<br>Timbrando con el SAT vía PAC',1700,true)">🔒 &nbsp;Facturar $486.50 y crear mi cuenta</button>
+        <p class="note center">Sin contraseñas: entrarás con un código de un solo uso a tu correo/celular — o con Face ID. Como Link.</p>
+      </div>
+
+      <!-- login: correo + código -->
+      <div class="scr" id="c-login">
+        <button class="back" onclick="show(acct?'c-wallet':'c-main')">Volver</button>
+        <h1>Entra a tu <em>wallet</em></h1>
+        <p class="sub">Sin contraseñas: te mandamos un código de 6 dígitos.</p>
+        <div class="field"><label>Correo o celular</label><input type="email" value="patricio@ejemplo.com"></div>
+        <button class="paymain" onclick="show('c-code');fillCode()">Mandarme el código</button>
+        <div class="chk"><i>✓</i><div>Este dispositivo quedará <b>recordado</b>: la próxima vez ni el código te pedimos.</div></div>
+        <p class="note center">¿Primera vez? <button class="linklike" style="padding:0" onclick="show('c-main')">Factura como invitado</button> — sin cuenta.</p>
+      </div>
+
+      <div class="scr" id="c-code">
+        <button class="back" onclick="show('c-login')">Volver</button>
+        <h1>Revisa tus <em>mensajes</em></h1>
+        <p class="sub">Si estás en tu celular, el código se captura solo:</p>
+        <div class="sms"><div class="ic">💬</div><div><b>facturafácil</b><span>Tu código es <b style="display:inline">482916</b>. Vence en 5 min.</span></div></div>
+        <div class="codes"><b id="d0"></b><b id="d1"></b><b id="d2"></b><b id="d3"></b><b id="d4"></b><b id="d5"></b></div>
+        <p class="note center" id="code-msg">Detectando código automáticamente…</p>
+      </div>
+
+      <!-- ================= CLIENTE · CON CUENTA (wallet 1 tap) ================= -->
+      <div class="scr" id="c-wallet">
+        <div class="idchip">
+          <div class="av">PW</div>
+          <div class="who"><b>Patricio Williams</b><span>patricio@ejemplo.com</span></div>
+          <div class="st"><i>● Sesión activa</i><button class="link2" onclick="setAcct(false)">Cerrar sesión</button></div>
+        </div>
+        <div class="row2">
+          <div class="field"><label>Folio de tu ticket</label><input value="A-4412"></div>
+          <div class="field"><label>Monto total</label><input value="$486.50"></div>
+        </div>
+        <div class="prof">
+          <div class="tag">Tu perfil fiscal · verificado con el SAT</div>
+          <div class="rfc">PAWI760815•••</div>
+          Patricio Williams
+          <div class="row"><span>Régimen</span><span>626 · RESICO</span></div>
+          <div class="row"><span>Uso CFDI</span><span class="uso-val" id="uso-prof">G03 · Gastos en general</span></div>
+          <div class="row"><span>Enviar a</span><span>3 correos</span></div>
+        </div>
+        <button class="rowsel" onclick="openUso(true)">🎯 <div>Uso de CFDI<br><b class="uso-val" id="uso-cur">G03 · Gastos en general</b></div><span class="chev">Cambiar ▾</span></button>
+        <div class="chk"><i>✓</i><div>tú · operación · <b>contadora</b></div></div>
+        <div id="w-mails"></div>
+        <button class="addmail" onclick="addMail('w-mails')">＋ Agregar otro correo a este envío</button>
+        <button class="paymain" onclick="proc('c-done','Validando folio A-4412 con el negocio… ✓<br>Timbrando con el SAT vía PAC',1500,true)">🔒 &nbsp;Facturar $486.50</button>
+        <button class="linklike" onclick="show('c-home')">Ver mi cuenta y facturas →</button>
+      </div>
+
+      <!-- ===== main screen / dashboard del cliente ===== -->
+      <div class="scr" id="c-home">
+        <button class="back" onclick="show(acct?'c-wallet':'c-main')">Volver a facturar</button>
+        <div class="idchip">
+          <div class="av">PW</div>
+          <div class="who"><b>Patricio Williams</b><span>patricio@ejemplo.com · RESICO</span></div>
+          <div class="st"><i>● Sesión activa</i><button class="link2" onclick="setAcct(false)">Cerrar sesión</button></div>
+        </div>
+        <div class="stats3">
+          <div class="stat3"><div class="n">5</div><div class="l">facturas en agosto</div></div>
+          <div class="stat3"><div class="n">4</div><div class="l">negocios de la red</div></div>
+          <div class="stat3"><div class="n">$3,060</div><div class="l">facturado este mes</div></div>
+        </div>
+        <button class="paymain" onclick="show('c-cam2');setTimeout(()=>show('c-next'),1900)">＋ &nbsp;Facturar otro ticket</button>
+        <p class="note center" style="margin-top:-4px">Escanea el QR en cualquier negocio de la red facturafacil.com</p>
+        <div class="list">
+          <div class="li" id="li-hoy"><div class="ic">🔩</div><div><b>Ferretería El Norte</b>hoy 13:42 · vía QR <button class="link2" id="li-hoy-cancel" onclick="show('c-cancel')">Cancelar</button></div><div class="amt" id="li-hoy-amt">$486.50<small>PDF · XML</small></div></div>
+          <div class="li"><div class="ic">🌮</div><div><b>Fonda Doña Mary</b>12 ago · vía QR</div><div class="amt">$310.00<small>PDF · XML</small></div></div>
+          <div class="li"><div class="ic">⛽</div><div><b>Gasolinera Pemex Valle</b>8 ago · vía QR</div><div class="amt">$1,200.00<small>PDF · XML</small></div></div>
+          <div class="li"><div class="ic">🦷</div><div><b>Consultorio Dental Sonrisa</b>3 ago · vía QR</div><div class="amt">$850.00<small>PDF · XML</small></div></div>
+          <div class="li"><div class="ic">📚</div><div><b>Papelería La Pluma</b>1 ago · vía QR</div><div class="amt">$214.00<small>PDF · XML</small></div></div>
+        </div>
+        <button class="ghost" onclick="alert('Demo: ZIP del mes con todos tus XML — para tu contador o tu declaración.')">⬇ Descargar todo el mes (ZIP)</button>
+      </div>
+
+      <!-- cancelar factura -->
+      <div class="scr" id="c-cancel">
+        <button class="back" onclick="show('c-home')">Volver</button>
+        <h1>Cancelar <em>factura</em></h1>
+        <p class="sub">Ferretería El Norte · $486.50 · hoy 13:42 · UUID 8f3a…41d2</p>
+        <p class="sub"><b style="color:var(--ink)">¿Por qué la cancelas?</b> (motivo oficial del SAT)</p>
+        <button class="opt" onclick="cancelFact('01')"><div class="ic">✏️</div><div><b>Tiene errores y voy a refacturar</b><span>Motivo 01 — se cancela y emites una nueva con los datos corregidos, relacionada a esta.</span></div></button>
+        <button class="opt" onclick="cancelFact('02')"><div class="ic">🗑️</div><div><b>Tiene errores, no voy a refacturar</b><span>Motivo 02 — solo se cancela; la venta regresa a la factura global del negocio.</span></div></button>
+        <button class="opt" onclick="cancelFact('03')"><div class="ic">🚫</div><div><b>La operación no se llevó a cabo</b><span>Motivo 03 — devolución o compra que no ocurrió.</span></div></button>
+        <p class="note">El negocio y tu contadora reciben el aviso. Dentro del ejercicio la cancelación es directa; algunos casos requieren aceptación del receptor.</p>
+      </div>
+
+      <div class="scr" id="c-cancelled">
+        <div class="bigok" style="background:#B3462E">✓</div>
+        <h1 class="center">Factura <em>cancelada</em></h1>
+        <p class="sub center" id="cancel-motivo">Motivo 02 · registrada ante el SAT</p>
+        <div class="chk"><i>✓</i><div>La venta <b>regresó a la factura global</b> del negocio — su contabilidad queda cuadrada sola. Aviso enviado al negocio y a tu contadora.</div></div>
+        <button class="paymain" onclick="show(acct?'c-wallet':'c-main')">Refacturar con datos corregidos</button>
+        <button class="ghost" onclick="show('c-home')">Volver a mi cuenta</button>
+      </div>
+
+      <!-- facturar otro ticket (la red) -->
+      <div class="scr" id="c-cam2">
+        <div class="cam" style="flex:1"><div class="fr"></div><p>Escaneando QR del ticket…<br><small>Fonda Doña Mary · red facturafacil.com</small></p></div>
+      </div>
+
+      <div class="scr" id="c-next">
+        <button class="back" onclick="show('c-home')">Mi cuenta</button>
+        <div class="chk"><i>✓</i><div><b>Fonda Doña Mary</b> — red facturafácil · hoy 14:55</div></div>
+        <div class="row2">
+          <div class="field"><label>Folio de tu ticket</label><input value="B-0027"></div>
+          <div class="field"><label>Monto total</label><input value="$310.00"></div>
+        </div>
+        <div class="prof">
+          <div class="tag">Tu perfil fiscal · listo</div>
+          <div class="rfc">PAWI760815•••</div>
+          Patricio Williams · 626 RESICO · G03
+          <div class="row"><span>Enviar a</span><span>3 correos</span></div>
+        </div>
+        <button class="paymain" onclick="proc('c-done2','Validando folio B-0027… ✓<br>Timbrando con el SAT vía PAC',1400,true)">🔒 &nbsp;Facturar $310.00 en 1 tap</button>
+        <p class="note center">Mismo perfil, otro negocio — así funciona la red.</p>
+        <button class="linklike" onclick="show('c-home')">← Volver a mi cuenta</button>
+      </div>
+
+      <div class="scr" id="c-done2">
+        <div class="bigok">✓</div>
+        <h1 class="center">Listo en <em>6 segundos</em></h1>
+        <p class="sub center">Fonda Doña Mary · $310.00 · timbrada y enviada</p>
+        <div class="uuid">Folio fiscal (UUID): 5c22e8b1-77a4-49d0-b3f2-1e96cd04a881</div>
+        <button class="paymain" onclick="show('c-home')">Volver a mi cuenta →</button>
+      </div>
+
+      <!-- procesando (compartida) -->
+      <div class="scr" id="proc-scr">
+        <div class="spin"></div>
+        <p class="center sub" id="procmsg"></p>
+      </div>
+
+      <!-- done cliente -->
+      <div class="scr" id="c-done">
+        <div class="bigok">✓</div>
+        <h1 class="center">Factura <em>timbrada</em></h1>
+        <p class="sub center">XML + PDF enviados a todos tus correos<br>$486.50 · Ferretería El Norte · hoy 13:42</p>
+        <div class="uuid">Folio fiscal (UUID): 8f3a1c2e-94d7-4b6a-a1e0-77c25c9b41d2</div>
+        <div id="done-extra"></div>
+        <button class="ghost" onclick="alert('Demo: descarga de PDF y XML.')">⬇ Descargar PDF / XML</button>
+        <button class="paymain" onclick="show('c-home')">Ir a mi cuenta →</button>
+        <button class="linklike" onclick="show('c-cancel')">¿Datos incorrectos? Cancelar esta factura</button>
+        <button class="linklike" onclick="pickPersona(1)">↺ Probar de nuevo</button>
+      </div>
+
+      <!-- ================= DUEÑO ================= -->
+      <div class="scr" id="n-start">
+        <h1>Tu negocio, <em>facturando solo</em></h1>
+        <button class="paybtn ff" onclick="proc('n-dash','Abriendo tu panel…',1000)"><span style="font-weight:600;opacity:.95">Inicia sesión con</span><svg viewBox="0 0 32 32" style="width:21px;height:21px"><circle cx="16" cy="16" r="16" fill="#fff"/><path d="M18 6.5 10.6 17.4h4.9l-1.3 8.1 7.6-11.3h-5z" fill="#1F9A63"/></svg><span style="font-weight:900;letter-spacing:-.02em;font-size:16px">facturafácil</span></button>
+        <div class="divider">o da de alta tu negocio — 3 minutos, una sola vez</div>
+        <button class="scanbtn" onclick="show('n-scan');setTimeout(()=>show('n-datos'),1900)"><div class="camic">📷</div><div><b>Escanear el QR de mi Constancia (CSF)</b><span>Tus datos exactos ante el SAT en 2 segundos. Tu contador la tiene, o se descarga gratis.</span></div></button>
+        <button class="scanbtn sec" onclick="show('n-datos')"><div class="camic">⌨️</div><div><b>Capturar mis datos a mano</b><span>Si no tienes tu Constancia a la mano — con validación en vivo.</span></div></button>
+      </div>
+
+      <div class="scr" id="n-scan">
+        <div class="cam"><div class="fr"></div><p>Apunta al QR de tu Constancia…<br>leyendo tus datos del SAT</p></div>
+      </div>
+
+      <div class="scr" id="n-datos">
+        <button class="back" onclick="show('n-start')">Volver</button>
+        <div class="dots"><i class="on"></i><i></i><i></i></div>
+        <div class="chk"><i>✓</i><div><b>Datos leídos del SAT</b> — verifica que todo coincida:</div></div>
+        <div class="field"><label>RFC</label><input class="filled" value="FENO980312QX7" readonly></div>
+        <div class="field"><label>Razón social</label><input class="filled" value="FERRETERIA EL NORTE" readonly></div>
+        <div class="row2">
+          <div class="field"><label>Régimen</label><input class="filled" value="626 · RESICO" readonly></div>
+          <div class="field"><label>CP fiscal</label><input class="filled" value="64610" readonly></div>
+        </div>
+        <div class="field"><label>WhatsApp del negocio</label><input value="81 1234 5678"></div>
+        <div class="field"><label>Correo</label><input value="hola@ferreteriaelnorte.mx"></div>
+        <button class="paymain" onclick="show('n-sello')">Todo correcto, continuar</button>
+      </div>
+
+      <!-- sello sin sustos -->
+      <div class="scr" id="n-sello">
+        <button class="back" onclick="show('n-datos')">Atrás</button>
+        <div class="dots"><i></i><i class="on"></i><i></i></div>
+        <h1>Activa tu sello — <em>como prefieras</em></h1>
+        <p class="sub">El SAT exige firmar cada factura con tu CSD. Tú decides quién lo activa y cuándo:</p>
+        <div class="opt rec" style="cursor:default;flex-direction:column;align-items:stretch;gap:10px">
+          <div style="display:flex;gap:12px;align-items:flex-start"><div class="ic">🧮</div><div><b>Que lo active mi contador <span class="badge">recomendado</span></b><span>Le mandamos un link seguro — él ya custodia esos archivos. Tú no tocas nada.</span></div></div>
+          <div class="mailrow"><input type="email" value="karla@despachogarcia.mx"><button class="rm" style="width:auto;padding:0 14px;border-radius:11px;font-size:12.5px;font-weight:800;color:var(--pine);border-color:#fff;background:#fff" onclick="proc('n-listo','Enviando invitación segura a tu contador…',1300)">Enviar</button></div>
+        </div>
+        <button class="opt" onclick="show('n-csd')"><div class="ic">🔒</div><div><b>Subirlo yo mismo</b><span>Cifrado, solo firma facturas, revocable en el SAT cuando quieras. Nunca tu e.firma.</span></div></button>
+        <p class="note">🛡️ El CSD solo firma facturas — no mueve dinero ni firma trámites. Mismo esquema que Facturama, Contpaqi y Alegra desde hace 10+ años.</p>
+      </div>
+
+      <div class="scr" id="n-csd">
+        <button class="back" onclick="show('n-sello')">Atrás</button>
+        <h1>Tu sello, <em>cifrado</em></h1>
+        <button class="up" onclick="this.classList.add('done');this.querySelector('.st').textContent='✓ cargado'"><div class="ic">📄</div><div>Certificado <b>.cer</b></div><span class="st">subir</span></button>
+        <button class="up" onclick="this.classList.add('done');this.querySelector('.st').textContent='✓ cargado'"><div class="ic">🔑</div><div>Llave privada <b>.key</b></div><span class="st">subir</span></button>
+        <div class="field"><label>Contraseña del CSD</label><input type="password" placeholder="••••••••"></div>
+        <button class="paymain" onclick="proc('n-listo','Validando tu sello con el SAT…',1500)">Validar mi sello</button>
+        <p class="note">🔒 Cifrado AES-256 · botón "eliminar mi sello" siempre disponible · también puedes revocarlo directo en el SAT.</p>
+      </div>
+
+      <div class="scr" id="n-listo">
+        <button class="back" onclick="show('n-sello')">Atrás</button>
+        <div class="dots"><i></i><i></i><i class="on"></i></div>
+        <div class="bigok">✓</div>
+        <h1 class="center">¡Listo para <em>facturar</em>!</h1>
+        <p class="sub center">Este es el QR de tu mostrador — imprímelo o pídelo en acrílico.</p>
+        <div class="card"><div class="qr"></div><p class="note center"><b>Ferretería El Norte</b> · Suc. Cumbres<br>"Factura tu compra en 10 segundos"</p></div>
+        <button class="paymain" onclick="show('n-dash0')">Ir a mi panel</button>
+        <button class="linklike" onclick="setAcct(false)">Ver lo que verá tu cliente →</button>
+      </div>
+
+      <!-- panel de negocio NUEVO (en ceros) -->
+      <div class="scr" id="n-dash0">
+        <button class="back" onclick="show('n-listo')">Atrás</button>
+        <h1>Ferretería El Norte</h1>
+        <p class="sub">Tu panel · recién creado hoy</p>
+        <div class="kpis">
+          <div class="kpi"><div class="n">0</div><div class="l">ventas registradas</div></div>
+          <div class="kpi"><div class="n">0</div><div class="l">facturas emitidas</div></div>
+          <div class="kpi"><div class="n">0</div><div class="l">en la global</div></div>
+        </div>
+        <div class="empty"><b>Aún no hay movimiento — y está perfecto 🌱</b>Pega tu QR en el mostrador y aquí verás cada venta y cada factura en tiempo real.</div>
+        <div class="list">
+          <div class="li"><div class="ic">✅</div><div><b>Cuenta creada y validada con el SAT</b>hoy</div></div>
+          <div class="li"><div class="ic">⏳</div><div><b>Sello (CSD): invitación enviada a Karla</b>en cuanto lo active, timbras de verdad</div></div>
+          <div class="li"><div class="ic">🖨️</div><div><b>QR de mostrador activo</b>expórtalo o compártelo aquí abajo</div></div>
+        </div>
+        <div class="card">
+          <div class="qr" style="width:104px;height:104px"></div>
+          <p class="note center" style="margin-bottom:9px"><b>Tu QR de mostrador</b> · Ferretería El Norte · Suc. Cumbres</p>
+          <div class="qractions">
+            <button onclick="alert('Demo: descarga el QR en PDF tamaño carta y media carta, listo para imprimir o pedir en acrílico.')">⬇ Exportar PDF</button>
+            <button onclick="alert('Demo: se abre la hoja de compartir — mándalo a tu impresor o a tu equipo por WhatsApp.')">📤 Compartir</button>
+            <button onclick="alert('Demo: imprime directo desde el teléfono (AirPrint).')">🖨️ Imprimir</button>
+          </div>
+        </div>
+        <div class="card cream"><p class="note"><b>Tu primera global:</b> se programará sola al cierre del mes con lo que no se facture. Cero pendientes para ti.</p></div>
+        <button class="ghost" onclick="setAcct(false)">Ver lo que verá tu cliente →</button>
+        <button class="linklike" onclick="pickPersona(2)">↺ Volver al inicio del alta</button>
+      </div>
+
+      <div class="scr" id="n-dash">
+        <button class="back" onclick="show('n-start')">Inicio</button>
+        <h1>Ferretería El Norte</h1>
+        <p class="sub">Hoy · viernes 14 ago 2026</p>
+        <div class="kpis">
+          <div class="kpi"><div class="n">37</div><div class="l">ventas de hoy</div></div>
+          <div class="kpi"><div class="n">9</div><div class="l">facturadas por clientes</div></div>
+          <div class="kpi"><div class="n">28</div><div class="l">van a la global</div></div>
+        </div>
+        <div class="alert">⚙️ <div><b>Factura tardía resuelta sola:</b> se canceló la global (motivo 04), se reexpidió y se emitió la individual. Tu contadora ya tiene el aviso.</div></div>
+        <div class="list">
+          <div class="li"><div class="ic">🧾</div><div><b>Factura vía QR</b>RESICO · 13:42</div><div class="amt">$486.50</div></div>
+          <div class="li"><div class="ic">🧾</div><div><b>Factura vía QR</b>Persona moral · 12:10</div><div class="amt">$2,140.00</div></div>
+          <div class="li"><div class="ic">🌐</div><div><b>Global de julio</b>automática · 412 ventas</div><div class="amt">$188,304<small>1-ago</small></div></div>
+        </div>
+        <div class="card">
+          <div class="qr" style="width:104px;height:104px"></div>
+          <p class="note center" style="margin-bottom:9px"><b>Tu QR de mostrador</b> · Suc. Cumbres · siempre disponible aquí</p>
+          <div class="qractions">
+            <button onclick="alert('Demo: descarga el QR en PDF tamaño carta y media carta, listo para imprimir o pedir en acrílico.')">⬇ Exportar PDF</button>
+            <button onclick="alert('Demo: se abre la hoja de compartir — mándalo a tu impresor o a tu equipo por WhatsApp.')">📤 Compartir</button>
+            <button onclick="alert('Demo: imprime directo desde el teléfono (AirPrint).')">🖨️ Imprimir</button>
+          </div>
+        </div>
+        <div class="card cream"><p class="note"><b>Próxima global:</b> 1 de septiembre, sola, con lo no facturado de agosto. Ni tú ni tu contador hacen nada.</p></div>
+        <button class="ghost" onclick="alert('Demo: ZIP con XML + PDF del periodo para tu contador.')">⬇ Descargar XMLs del mes</button>
+        <button class="linklike" onclick="pickPersona(2)">↺ Volver al inicio del alta</button>
+      </div>
+
+      </div>
+
+      <!-- sheet: uso de CFDI -->
+      <div class="backdrop" id="usobk" onclick="openUso(false)"></div>
+      <div class="sheet" id="usosheet">
+        <div class="grab"></div>
+        <h5>¿Para qué usarás esta factura?</h5>
+        <button class="op sel" onclick="setUso(this,'G03 · Gastos en general')">G03 · Gastos en general<small>El más común — deducción de gastos del negocio</small><span class="mark">✓</span></button>
+        <button class="op" onclick="setUso(this,'G01 · Adquisición de mercancías')">G01 · Adquisición de mercancías<small>Compras para revender</small></button>
+        <button class="op" onclick="setUso(this,'D01 · Honorarios médicos')">D01 · Honorarios médicos<small>Deducción personal anual</small></button>
+        <button class="op" onclick="setUso(this,'S01 · Sin efectos fiscales')">S01 · Sin efectos fiscales<small>Solo comprobante, no se deduce</small></button>
+        <p class="note center" style="margin-top:4px">Se guarda como tu opción por defecto para la próxima.</p>
+      </div>
+
+      
+  <button class="demofab" onclick="menu(true)" title="Menú del demo"><svg viewBox="0 0 32 32" style="width:24px;height:24px"><rect width="32" height="32" rx="9" fill="#1E4A40"/><path d="M18.4 5 9.2 18.2h5.6l-1.5 8.8 9.5-12h-5.7z" fill="#E6B45C"/></svg></button>
+
+  <div class="backdrop" id="menubk" onclick="menu(false)"></div>
+  <div class="sheet" id="menusheet">
+    <div class="grab"></div>
+    <h5>Demo facturafácil · elige la vista</h5>
+    <button class="op on" id="pc1" onclick="pickPersona(1);menu(false)">🧾 Cliente final<small>Escaneó el QR del negocio · captura folio + monto y factura</small></button>
+    <div class="menuseg" id="acctseg">
+      <button class="on" id="st0" onclick="setAcct(false);menu(false)">🆕 Sin cuenta</button>
+      <button id="st1" onclick="setAcct(true);menu(false)">⚡ Con cuenta</button>
+    </div>
+    <button class="op" id="pc2" onclick="pickPersona(2);menu(false)">🏪 Dueño del negocio<small>Alta en 3 min · sello · QR de mostrador · panel</small></button>
+    <button class="menureset" onclick="pickPersona(persona);menu(false)">↺ Reiniciar esta vista</button>
+    <p class="note center" style="margin-top:8px">Mockup navegable — ningún dato es real. · Grupo Dar Fácil</p>
+  </div>
+</div>
+<script>
+  let persona=1, acct=false;
+  const S=id=>document.getElementById(id);
+  function show(id){
+    document.querySelectorAll('.scr').forEach(e=>e.classList.remove('on'));
+    S(id).classList.add('on');
+    window.scrollTo(0,0);
+  }
+  function pickPersona(n){
+    persona=n;
+    S('pc1').classList.toggle('on',n===1);
+    S('pc2').classList.toggle('on',n===2);
+    S('acctseg').style.display = n===1 ? 'flex' : 'none';
+    S('topname').textContent = n===1 ? 'Ferretería El Norte' : 'FacturaFácil · Mi negocio';
+    S('topamt').style.display = n===1 ? 'inline-block' : 'none';
+    show(n===1 ? (acct ? 'c-wallet' : 'c-main') : 'n-start');
+  }
+  function setAcct(v){
+    acct=v;
+    S('st0').classList.toggle('on',!v);
+    S('st1').classList.toggle('on',v);
+    if(persona!==1) pickPersona(1); else show(v ? 'c-wallet' : 'c-main');
+  }
+  function proc(next,msg,ms,conf){
+    show('proc-scr');
+    S('procmsg').innerHTML='<b style="color:var(--ink)">'+msg+'</b>';
+    setTimeout(()=>{
+      if(next==='c-done'){
+        S('done-extra').innerHTML = acct
+          ? '<div class="chk"><i>✓</i><div><b>Guardada en tu historial.</b> La encuentras en tu wallet junto a las de otros negocios.</div></div>'
+          : '<div class="savecard"><div class="top"><div class="chkbox">✓</div><div><b>⚡ Cuenta creada con tus datos verificados</b><span class="s">Este dispositivo quedó recordado. La próxima vez —aquí o en cualquier negocio afiliado— será 1 tap.</span></div></div></div>';
+        acct=true; S('st0').classList.remove('on'); S('st1').classList.add('on');
+      }
+      show(next); if(conf) confetti();
+    }, ms);
+  }
+  function openUso(v){
+    S('usobk').classList.toggle('open',v);
+    S('usosheet').classList.toggle('open',v);
+  }
+  function setUso(btn,txt){
+    document.querySelectorAll('#usosheet .op').forEach(o=>{o.classList.remove('sel'); const m=o.querySelector('.mark'); if(m) m.remove();});
+    btn.classList.add('sel');
+    btn.insertAdjacentHTML('beforeend','<span class="mark">✓</span>');
+    S('uso-cur').textContent=txt;
+    S('uso-prof').textContent=txt;
+    setTimeout(()=>openUso(false),250);
+  }
+  function fillCode(){
+    const dig='482916'.split('');
+    dig.forEach((d,i)=>{ const el=S('d'+i); el.textContent=''; el.classList.remove('f'); });
+    S('code-msg').innerHTML='Detectando código automáticamente…';
+    dig.forEach((d,i)=>{ setTimeout(()=>{ const el=S('d'+i); el.textContent=d; el.classList.add('f'); }, 1000+i*160); });
+    setTimeout(()=>{ S('code-msg').innerHTML='<b style="color:var(--pine)">✓ Código verificado — sesión iniciada</b>'; }, 1000+6*160+120);
+    setTimeout(()=>{ acct=true; S('st0').classList.remove('on'); S('st1').classList.add('on'); show('c-wallet'); }, 1000+6*160+750);
+  }
+  function toggleSave(){
+    S('savechk').classList.toggle('off');
+    S('saveinner').style.display = S('savechk').classList.contains('off') ? 'none' : 'block';
+  }
+  function addMail(id){
+    const d=document.createElement('div'); d.className='mailrow'; d.style.marginTop='6px';
+    d.innerHTML='<input type="email" placeholder="otro correo — ej. contadora@despacho.mx">'+
+                '<button class="rm" title="Quitar" onclick="this.parentElement.remove()">×</button>';
+    S(id).appendChild(d); d.querySelector('input').focus();
+  }
+  function cancelFact(m){
+    show('proc-scr');
+    S('procmsg').innerHTML='<b style="color:var(--ink)">Cancelando ante el SAT…</b><br>Motivo '+m+' · notificando al negocio y a tu contadora';
+    setTimeout(()=>{
+      S('cancel-motivo').textContent='Motivo '+m+' · registrada ante el SAT';
+      const li=S('li-hoy');
+      if(li && !li.dataset.cancelled){
+        li.dataset.cancelled='1';
+        S('li-hoy-amt').innerHTML='<span style="text-decoration:line-through;color:var(--ink2)">$486.50</span><small style="color:#B3462E;font-weight:800">CANCELADA</small>';
+        const c=S('li-hoy-cancel'); if(c) c.remove();
+      }
+      show('c-cancelled');
+    },1500);
+  }
+  function confetti(){
+    const cols=['#C07F1E','#1E4A40','#2E6B5A','#E6B45C','#1F9A63','#F3ECE0'];
+    const c=document.createElement('div'); c.className='confetti';
+    for(let i=0;i<40;i++){
+      const s=document.createElement('i');
+      s.style.left=(Math.random()*100)+'%';
+      s.style.background=cols[i%cols.length];
+      s.style.animationDuration=(2+Math.random()*1.6)+'s';
+      s.style.animationDelay=(Math.random()*0.5)+'s';
+      c.appendChild(s);
+    }
+    S('screen').appendChild(c);
+    setTimeout(()=>c.remove(),4500);
+  }
+</script>
+
+<script>
+  function route(){
+    var w=document.getElementById('ql-warn'); if(w) w.style.display='none';
+    var h=(location.hash||'').toLowerCase();
+    try{
+      if(h.indexOf('negocio')>-1 || h.indexOf('registro')>-1){ pickPersona(2); }
+      else if(h.indexOf('cuenta')>-1){ setAcct(true); }
+      else { pickPersona(1); }
+    }catch(e){}
+  }
+  route();
+  window.addEventListener('hashchange', route);
+  function menu(v){
+    document.getElementById('menubk').classList.toggle('open',v);
+    document.getElementById('menusheet').classList.toggle('open',v);
+  }
+</script>
+
+</body>
+</html>
